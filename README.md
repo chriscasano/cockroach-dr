@@ -22,7 +22,12 @@ cockroach workload run movr --max-rate 10 --duration 10s
 "One day, Tyler calls us and says...'What are all of these $1000 charges?''"
 
 ```
-cockroach sql --insecure -d movr -e "select r.* from users u inner join rides r on u.id = r.rider_id where u.name = 'Tyler Dalton' and r.revenue = 1000;"
+cockroach sql --insecure -d movr -e \
+"select r.* \
+from users u inner join rides r \
+on u.id = r.rider_id \
+where u.name = 'Tyler Dalton' \
+and r.revenue = 1000;"
 ```
 
 ### Identify Transactions in Audit Log
@@ -51,7 +56,11 @@ Get ride balances before the rogue update was applied.  Using the first two colu
 From audit log: "I200829 18:30:13.261462 ...."  which can be represented like this for "2020-08-29 18:30:13.261462".  Let's make this 1 second earlier so we can see the values before the change was made.  "2020-08-29 18:30:12"
 
 ```
-cockroach sql --insecure -d movr -e "select r.id, r.revenue from users u inner join rides r on u.id = r.rider_id as of system time '<insert timestamp from the audit log>' where u.name = 'Tyler Dalton';"
+cockroach sql --insecure -d movr -e \
+"select r.id, r.revenue \
+from users u inner join rides r \
+on u.id = r.rider_id as of system time '<insert timestamp from the audit log>' \
+where u.name = 'Tyler Dalton';"
 ```
 
 example: "select r.id, r.revenue from users u inner join rides r on u.id = r.rider_id as of system time '2020-08-29 18:30:12' where u.name = 'Tyler Dalton';"
@@ -61,7 +70,11 @@ example: "select r.id, r.revenue from users u inner join rides r on u.id = r.rid
 "The following query returns the correct value of the rides records before the malicious transaction was applied.  Using the output from the query below, you can apply each of these updates to restore the rides table back to it's original state."
 
 ```
-cockroach sql --insecure -d movr -e "select 'update movr.rides set revenue = ' || r.revenue::STRING || ' where id = ' || '''' || r.id::STRING || '''' || ';' from users u inner join rides r on u.id = r.rider_id as of system time '<insert timestamp from the audit log>' where u.name = 'Tyler Dalton';"
+cockroach sql --insecure -d movr -e \
+"select 'update movr.rides set revenue = ' || r.revenue::STRING || ' where id = ' || '''' || r.id::STRING || '''' || ';' \
+from users u inner join rides r \
+on u.id = r.rider_id as of system time '<insert timestamp from the audit log>' \
+where u.name = 'Tyler Dalton';"
 ```
 
 For each of the values that are returned up above, you can apply those values into a cockroach sql shell to update to ride transactions to the previous value.
