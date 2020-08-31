@@ -32,7 +32,7 @@ and r.revenue = 1000;"
 
 ### Identify Transactions in Audit Log
 
-"Let's go to the audit logging directory and do a search for transactions containing $1000"
+Let's go to the audit logging directory and do a search for transactions containing $1000.  These logs can be found on [here](https://www.cockroachlabs.com/docs/v20.1/experimental-audit.html#audit-log-file-storage-location) in your CockroachDB installation.
 
 ```
 cat cockroach-sql-audit.log | grep 1000 | grep Tyler
